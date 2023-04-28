@@ -1,0 +1,65 @@
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  text-align: left;
+}
+
+#last-updated {
+  margin-top: 1em;
+  font-style: italic;
+}
+
+tbody > tr:nth-child(2n) {
+  background: #f5f5f5;
+}
+
+img {
+  max-width: 40px;
+}
+
+td.correct {
+  background: green;
+}
+
+td.incorrect {
+  background: rgb(106, 3, 3);
+}
+
+td {
+  width: 7%;
+}
+
+td.wide {
+  width: 15%;
+}
+
+td.narrow {
+  width: 5%;
+}
+
+td.logo {
+  text-align: center;
+}
+
+div.series {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+span {
+  color: rgb(199, 199, 199);
+}
+
+span.correct-games {
+  font-weight: 900;
+  color: white;
+}
+
+div.inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
