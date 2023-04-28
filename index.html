@@ -146,7 +146,8 @@
             let pickSVG = document.createElement('img')
 
             const winnerId = games.find(game => game.id === gameId).winner_id
-            if(entry[pick_key] === '14') {
+            // Some logos look better with primary light
+            if(entry[pick_key] === '14' || entry[pick_key] === '10') {
               pickSVG.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/${entry[pick_key]}.svg`
             } else {
               pickSVG.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/${entry[pick_key]}.svg`
