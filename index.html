@@ -8,7 +8,7 @@
 
   <style>
     table {
-      width: 800px;
+      width: 100%;
       border-collapse: collapse;
     }
 
@@ -25,8 +25,6 @@
       background: #f5f5f5
     }
 
-
-
     img {
       max-width: 40px;
     }
@@ -37,6 +35,22 @@
 
     td.incorrect {
       background: rgb(106, 3, 3);
+    }
+
+    td {
+      width: 7%;
+    }
+
+    td.wide {
+      width: 15%;
+    }
+
+    td.narrow {
+      width: 5%
+    }
+
+    td.logo {
+      text-align: center;
     }
   </style>
 </head>
@@ -125,6 +139,7 @@
           rankTd.innerHTML = rank;
           let nameTd = document.createElement('td')
           nameTd.innerHTML = entry_name;
+          nameTd.classList.add('wide')
           let pointsTd = document.createElement('td')
           pointsTd.innerHTML = points;
           let possiblePointsTd = document.createElement('td')
@@ -133,6 +148,8 @@
           let championlogo = document.createElement('img')
           championlogo.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/${champion_id}.svg`;
           championTd.appendChild(championlogo)
+          championTd.classList.add('narrow')
+          championTd.classList.add('logo')
 
           tr.appendChild(rankTd)
           tr.appendChild(nameTd)
@@ -143,6 +160,9 @@
           firstRound.forEach(gameId => {
             pick_key = `match_${gameId}_pick`;
             let gameTd = document.createElement('td');
+            gameTd.classList.add('narrow')
+            gameTd.classList.add('logo')
+
             let pickSVG = document.createElement('img')
 
             const winnerId = games.find(game => game.id === gameId).winner_id
@@ -155,7 +175,6 @@
             gameTd.appendChild(pickSVG)
 
             if(winnerId !== null) {
-              console.log({winnerId, pick: entry[pick_key]})
               if(parseInt(entry[pick_key]) === winnerId) {
                 gameTd.classList.add('correct')
               } else {
