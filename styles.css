@@ -8,8 +8,10 @@ h1 img {
   margin-right: 1em;
 }
 table {
+  max-width: 1600px;
   width: 100%;
   border-collapse: collapse;
+  margin: auto;
 }
 
 thead {
@@ -71,4 +73,14 @@ div.inner {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+#last-updated {
+  max-width: 100ch;
+  margin: auto;
+  margin-top: 2em;
+}
+footer {
+  max-width: 100ch;
+  margin: auto;
 }
