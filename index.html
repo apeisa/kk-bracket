@@ -30,6 +30,14 @@
     img {
       max-width: 40px;
     }
+
+    td.correct {
+      background: green
+    }
+
+    td.incorrect {
+      background: rgb(106, 3, 3);
+    }
   </style>
 </head>
 <body>
@@ -44,6 +52,47 @@
         <th>Mestarivalinta</th>
         <th>Pisteitä</th>
         <th>Mahdolliset maksimipisteet</th>
+        <th>
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/21.svg">
+          -
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/55.svg">
+        </th>
+        <th>
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/25.svg">
+          -
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/30.svg">
+        </th>
+        <th>
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/54.svg">
+          -
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/52.svg">
+        </th>
+        <th>
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/22.svg">
+          -
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/26.svg">
+        </th>
+        <th>
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/6.svg">
+          -
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/13.svg">
+        </th>
+        <th>
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/10.svg">
+          -
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/14.svg">
+        </th>
+        <th>
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/12.svg">
+          -
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/2.svg">
+        </th>
+        <th>
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/1.svg">
+          -
+          <img src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/3.svg">
+        </th>
+        
       </tr>
     </thead>
     <tbody></tbody>
@@ -55,7 +104,12 @@
     let lastUpdated = null;
     fetch('https://low6-nhl-brackets-prod.azurewebsites.net/leagues/19816/leaderboard?offset=0&limit=17')
       .then(res => res.json())
-      .then(({entries}) => {
+      .then(async ({entries}) => {
+        const series = await fetch('https://low6-nhl-brackets-prod.azurewebsites.net/game').then(res => res.json());
+        const games = series.game.series_results;
+        console.log(series)
+
+        const firstRound = [101, 102, 103, 104, 105, 106, 107, 108];
         entries.forEach(entry => {
           let tr = document.createElement('tr');
           const {
@@ -85,6 +139,30 @@
           tr.appendChild(championTd)
           tr.appendChild(pointsTd)
           tr.appendChild(possiblePointsTd)
+
+          firstRound.forEach(gameId => {
+            pick_key = `match_${gameId}_pick`;
+            let gameTd = document.createElement('td');
+            let pickSVG = document.createElement('img')
+
+            const winnerId = games.find(game => game.id === gameId).winner_id
+            if(entry[pick_key] === '14') {
+              pickSVG.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/${entry[pick_key]}.svg`
+            } else {
+              pickSVG.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/${entry[pick_key]}.svg`
+            }
+            gameTd.appendChild(pickSVG)
+
+            if(winnerId !== null) {
+              console.log({winnerId, pick: entry[pick_key]})
+              if(parseInt(entry[pick_key]) === winnerId) {
+                gameTd.classList.add('correct')
+              } else {
+                gameTd.classList.add('incorrect')
+              }
+            }
+            tr.appendChild(gameTd)
+          })
 
           tbody.appendChild(tr)
 
