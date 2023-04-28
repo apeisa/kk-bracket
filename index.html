@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Koodiklinikan NHL Bracket</title>
+
+  <style>
+    table {
+      width: 800px;
+    }
+
+    thead {
+      text-align: left;
+    }
+
+    #last-updated {
+      margin-top: 1em;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Sijoitus</th>
+        <th>Nimi</th>
+        <th>Pisteitä</th>
+        <th>Mahdolliset maksimipisteet</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div id="last-updated"></div>
+  
+  <script>
+    const tbody = document.querySelector('tbody')
+    let lastUpdated = null;
+    fetch('https://low6-nhl-brackets-prod.azurewebsites.net/leagues/19816/leaderboard?offset=0&limit=17')
+      .then(res => res.json())
+      .then(({entries}) => {
+        entries.forEach(entry => {
+          let tr = document.createElement('tr');
+          const {
+            rank,
+            entry_name,
+            points,
+            possible_points,
+            updated_at
+          } = entry
+
+          let rankTd = document.createElement('td')
+          rankTd.innerHTML = rank;
+          let nameTd = document.createElement('td')
+          nameTd.innerHTML = entry_name;
+          let pointsTd = document.createElement('td')
+          pointsTd.innerHTML = points;
+          let possiblePointsTd = document.createElement('td')
+          possiblePointsTd.innerHTML = possible_points;
+
+          tr.appendChild(rankTd)
+          tr.appendChild(nameTd)
+          tr.appendChild(pointsTd)
+          tr.appendChild(possiblePointsTd)
+
+          tbody.appendChild(tr)
+
+          if(!lastUpdated) {
+            lastUpdated = updated_at
+          } else if (lastUpdated < updated_at) {
+            lastUpdated = updated_at
+          }
+
+        })
+
+        lastUpdated = new Date(lastUpdated)
+        const lastUpdatedNode = document.querySelector('#last-updated')
+        lastUpdatedNode.innerHTML = `Päivitetty: ${lastUpdated.toLocaleString()}`
+      })
+  </script>
+</body>
+</html>
