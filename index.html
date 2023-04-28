@@ -58,6 +58,14 @@
       align-items: center;
       justify-content: center;
     }
+    span {
+      color: rgb(199, 199, 199);
+    }
+
+    span.correct-games {
+      font-weight: 900;
+      color: white
+    }
   </style>
 </head>
 <body>
@@ -188,7 +196,9 @@
 
             let pickSVG = document.createElement('img')
 
-            const winnerId = games.find(game => game.id === gameId).winner_id
+            const currentSeries = games.find(game => game.id === gameId)
+            const winnerId = currentSeries.winner_id
+
             // Some logos look better with primary light
             if(entry[pick_key] === '14' || entry[pick_key] === '10') {
               pickSVG.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/${entry[pick_key]}.svg`
@@ -201,7 +211,17 @@
             pickSVG.alt = teamName
 
             if(winnerId !== null) {
+              const t1_wins = parseInt(currentSeries.team_1_wins);
+              const t2_wins = parseInt(currentSeries.team_2_wins);
+              const seriesLength = t1_wins + t2_wins
+              const howManyGames = entry[`match_${gameId}_match_played`]
+              const span = document.createElement('span')
+              span.textContent = `(in ${howManyGames})`
+              gameTd.appendChild(span)
               if(parseInt(entry[pick_key]) === winnerId) {
+                if(seriesLength == howManyGames) {
+                  span.classList.add('correct-games')
+                }
                 gameTd.classList.add('correct')
               } else {
                 gameTd.classList.add('incorrect')
