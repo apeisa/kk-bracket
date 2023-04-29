@@ -129,20 +129,6 @@ fetch(URL)
       tbody.appendChild(tr);
     });
 
-    const lastUpdated = entries.reduce((acc, curr) => {
-      if (acc === null) {
-        return curr.updated_at;
-      } else if (acc < curr.updated_at) {
-        return curr.updated_at;
-      } else {
-        return acc;
-      }
-    }, null);
-    const lastUpdatedNode = document.querySelector("#last-updated");
-    lastUpdatedNode.innerHTML = `Pisteet päivitetty: ${new Date(
-      lastUpdated
-    ).toLocaleString()}`;
-
     document.querySelector("table").style = "display: block";
     document.querySelector("#loading").style = "display: none";
   });
