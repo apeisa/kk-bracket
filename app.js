@@ -6,24 +6,73 @@
  * A better approach would be to actually map what types are used and where.
  */
 
-const tbody = document.querySelector("tbody");
-let lastUpdated = null;
-let KOODIKLINIKKA_LEAGUE_ID = 19816;
-let URL = `https://low6-nhl-brackets-prod.azurewebsites.net/leagues/${KOODIKLINIKKA_LEAGUE_ID}/leaderboard?offset=0&limit=50`;
+/* CONFIGURATION */
+// If you want to configure this to your league, change the LEAGUE_ID to match
+// your league id in NHL Bracket Challenge
+// and LEAGUE_DISPLAY_NAME to your league's name for the heading
+const LEAGUE_ID = 19816;
+const LEAGUE_DISPLAY_NAME = "Koodiklinikan";
+/* END OF CONFIGURATION */
 
+const ENTRIES_URL = `https://low6-nhl-brackets-prod.azurewebsites.net/leagues/${LEAGUE_ID}/leaderboard?offset=0&limit=50`;
+const SERIES_URL = "https://low6-nhl-brackets-prod.azurewebsites.net/game";
+
+let title = document.querySelector("title");
+title.textContent = `${LEAGUE_DISPLAY_NAME} ${title.textContent}`;
+
+let h1 = document.querySelector("h1");
+h1.textContent = `${LEAGUE_DISPLAY_NAME} ${h1.textContent}`;
+
+/**
+ * Checks if user's pick for a given series is correct
+ * @param {object} entry User's entry
+ * @param {object} game Game result
+ * @returns user's pick matches the result of game
+ */
 function isCorrectPick(entry, game) {
+  // User picks are strings, winner_id is number. Lovely.
   return parseInt(entry[`match_${game.id}_pick`]) === game.winner_id;
 }
 
+/**
+ * Checks if user has guessed the right amount of games for a series
+ *
+ * @param {object} entry
+ * @param {object} game
+ * @returns
+ */
 function isCorrectAmountGames(entry, game) {
+  // If series isn't finished yet, early return false
+  if (!game.is_scored) {
+    return false;
+  }
+
+  // Amount of wins are strings. Lovely.
   const t1_wins = parseInt(game.team_1_wins);
   const t2_wins = parseInt(game.team_2_wins);
   const seriesLength = t1_wins + t2_wins;
-  const howManyGames = entry[`match_${game.id}_match_played`];
+  // Amount of wins is a string. Lovely.
+  const howManyGames = parseInt(entry[`match_${game.id}_match_played`]);
 
-  return seriesLength == howManyGames;
+  return seriesLength === howManyGames;
 }
 
+/**
+ * Given a list of series, checks if they have all finished
+ * @param {Array} series
+ * @returns all series have finished
+ */
+function hasFinished(series) {
+  return series.every((serie) => serie.is_scored);
+}
+
+/**
+ * Adds dynamic table header cells for series matchups
+ * in form of "[homeLogo] - [awayLogo]"
+ *
+ * @param {Array} games An array of currently displayed series
+ * @param {Array} teams An array of teams in the playoffs
+ */
 function createHeaders(games, teams) {
   const tr = document.querySelector("thead > tr");
   games.forEach((game) => {
@@ -34,15 +83,13 @@ function createHeaders(games, teams) {
     tr.appendChild(th);
 
     const homeLogo = document.createElement("img");
-    homeLogo.alt = teams.find(
-      (team) => team.team_id == game.team_1_id
-    )?.display_name;
+    homeLogo.alt =
+      teams.find((team) => team.team_id == game.team_1_id)?.display_name || "?";
     homeLogo.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/${game.team_1_id}.svg`;
 
     const awayLogo = document.createElement("img");
-    awayLogo.alt = teams.find(
-      (team) => team.team_id == game.team_2_id
-    )?.display_name;
+    awayLogo.alt =
+      teams.find((team) => team.team_id == game.team_2_id)?.display_name || "?";
     awayLogo.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/${game.team_2_id}.svg`;
 
     const separator = document.createElement("span");
@@ -53,8 +100,22 @@ function createHeaders(games, teams) {
   });
 }
 
+/**
+ * Creates a row based on user's information:
+ * their rank, name, champion pick, points, possible max points
+ * and each pick.
+ *
+ * If a series has already finished, also show if the pick was correct/incorrect
+ * and how many games user had guessed
+ *
+ * @param {object} entry
+ * @param {HTMLTableRowElement} tr
+ * @param {Array} games
+ * @param {Array} teams
+ */
 function createRow(entry, tr, games, teams) {
   const { rank, entry_name, points, possible_points, champion_id } = entry;
+
   // Create columns
   let rankTd = document.createElement("td");
   let nameTd = document.createElement("td");
@@ -74,7 +135,7 @@ function createRow(entry, tr, games, teams) {
   nameTd.classList.add("wide");
 
   let championLogo = document.createElement("img");
-  championLogo.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/${champion_id}.svg`;
+  championLogo.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/${champion_id}.svg`;
   championLogo.alt = teams.find(
     (team) => team.team_id === parseInt(champion_id)
   ).display_name;
@@ -98,26 +159,18 @@ function createRow(entry, tr, games, teams) {
     gameTd.classList.add("logo");
 
     const gameId = game.id;
-    const pick_key = `match_${gameId}_pick`;
+    const pickKey = `match_${gameId}_pick`;
+    const userPick = entry[pickKey];
 
     // If user's pick is not in the running anymore
-    if (
-      entry[pick_key] != game.team_1_id &&
-      entry[pick_key] != game.team_2_id
-    ) {
+    if (userPick != game.team_1_id && userPick != game.team_2_id) {
       selectedPick.src = `invalid.svg`;
       selectedPick.alt = "Invalid pick";
     } else {
-      // Some logos look better with primary light
-      if (entry[pick_key] === "14" || entry[pick_key] === "10") {
-        selectedPick.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/${entry[pick_key]}.svg`;
-      } else {
-        selectedPick.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/${entry[pick_key]}.svg`;
-      }
-      teamName = teams.find(
-        (team) => team.team_id === parseInt(entry[pick_key])
+      selectedPick.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/${userPick}.svg`;
+      selectedPick.alt = teams.find(
+        (team) => team.team_id === parseInt(userPick)
       ).display_name;
-      selectedPick.alt = teamName;
     }
 
     // If the series is finished, show which picks were right
@@ -141,12 +194,10 @@ function createRow(entry, tr, games, teams) {
   });
 }
 
-fetch(URL)
+fetch(ENTRIES_URL)
   .then((res) => res.json())
   .then(async ({ entries }) => {
-    const series = await fetch(
-      "https://low6-nhl-brackets-prod.azurewebsites.net/game"
-    ).then((res) => res.json());
+    const series = await fetch(SERIES_URL).then((res) => res.json());
 
     const games = series.game.series_results;
     const teams = series.game.teams;
@@ -157,18 +208,21 @@ fetch(URL)
     const finals = games.filter((game) => game.round_sequence === 4);
 
     // Choose the round to display based on the earliest round that is not finished
+    // If you want to tweak what is displayed, tinker with this.
     let roundToDisplay = [];
-    if (firstRoundGames.some((series) => !series.is_scored)) {
+    if (!hasFinished(firstRoundGames)) {
       roundToDisplay = firstRoundGames;
-    } else if (secondRoundGames.some((series) => !series.is_scored)) {
+    } else if (!hasFinished(secondRoundGames)) {
       roundToDisplay = secondRoundGames;
-    } else if (conferenceFinals.some((series) => !series.is_scored)) {
+    } else if (!hasFinished(conferenceFinals)) {
       roundToDisplay = conferenceFinals;
     } else {
       roundToDisplay = finals;
     }
 
     createHeaders(roundToDisplay, teams);
+
+    const tbody = document.querySelector("tbody");
 
     entries.forEach((entry) => {
       let tr = document.createElement("tr");
