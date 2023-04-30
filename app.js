@@ -1,3 +1,11 @@
+/* A general note: this file uses a lot of == instead of === for a purpose.
+ * The API is very inconsistent in how it stores information:
+ * sometimes its numbers and sometimes numeric strings.
+ *
+ * Don't blindly refactor them to === or you'll make a mess.
+ * A better approach would be to actually map what types are used and where.
+ */
+
 const tbody = document.querySelector("tbody");
 let lastUpdated = null;
 let KOODIKLINIKKA_LEAGUE_ID = 19816;
@@ -63,17 +71,25 @@ function createRow(entry, tr, games, teams) {
     const gameId = game.id;
     const pick_key = `match_${gameId}_pick`;
 
-    // Some logos look better with primary light
-    if (entry[pick_key] === "14" || entry[pick_key] === "10") {
-      selectedPick.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/${entry[pick_key]}.svg`;
+    // If user's pick is not in the running anymore
+    if (
+      entry[pick_key] != game.team_1_id &&
+      entry[pick_key] != game.team_2_id
+    ) {
+      selectedPick.src = `invalid.svg`;
+      selectedPick.alt = "Invalid pick";
     } else {
-      selectedPick.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/${entry[pick_key]}.svg`;
+      // Some logos look better with primary light
+      if (entry[pick_key] === "14" || entry[pick_key] === "10") {
+        selectedPick.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/${entry[pick_key]}.svg`;
+      } else {
+        selectedPick.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-dark/${entry[pick_key]}.svg`;
+      }
+      teamName = teams.find(
+        (team) => team.team_id === parseInt(entry[pick_key])
+      ).display_name;
+      selectedPick.alt = teamName;
     }
-
-    teamName = teams.find(
-      (team) => team.team_id === parseInt(entry[pick_key])
-    ).display_name;
-    selectedPick.alt = teamName;
 
     // If the series is finished, show which picks were right
     // and how many games participants guessed the series would take
