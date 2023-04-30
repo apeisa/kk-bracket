@@ -24,6 +24,35 @@ function isCorrectAmountGames(entry, game) {
   return seriesLength == howManyGames;
 }
 
+function createHeaders(games, teams) {
+  const tr = document.querySelector("thead > tr");
+  games.forEach((game) => {
+    const th = document.createElement("th");
+    const div = document.createElement("div");
+    div.classList.add("series");
+    th.appendChild(div);
+    tr.appendChild(th);
+
+    const homeLogo = document.createElement("img");
+    homeLogo.alt = teams.find(
+      (team) => team.team_id == game.team_1_id
+    )?.display_name;
+    homeLogo.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/${game.team_1_id}.svg`;
+
+    const awayLogo = document.createElement("img");
+    awayLogo.alt = teams.find(
+      (team) => team.team_id == game.team_2_id
+    )?.display_name;
+    awayLogo.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/${game.team_2_id}.svg`;
+
+    const separator = document.createElement("span");
+    separator.textContent = " - ";
+    div.appendChild(homeLogo);
+    div.appendChild(separator);
+    div.appendChild(awayLogo);
+  });
+}
+
 function createRow(entry, tr, games, teams) {
   const { rank, entry_name, points, possible_points, champion_id } = entry;
   // Create columns
@@ -138,6 +167,8 @@ fetch(URL)
     } else {
       roundToDisplay = finals;
     }
+
+    createHeaders(roundToDisplay, teams);
 
     entries.forEach((entry) => {
       let tr = document.createElement("tr");
