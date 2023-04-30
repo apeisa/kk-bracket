@@ -16,6 +16,10 @@ Käyttää NHL Bracket Challengen API-rajapintoja, jotka näytti olevan auki.
 
 Saa tehä pullareita jotka lisää/korjaa/parantelee. Erityisesti jos teet siitä nätimmän kuin se on nyt.
 
+## Lokaalia testausta
+
+Jos tahtoo testailla lokaalisti eri tiloja ja tilanteita, `tests/`-kansiosta löytyy mock-apit entryille ja sarjojen tilanteille. Ne on wrapattu objektiin, jossa on yksi avain, `"api"`, jotta kansiossa voi ajaa `npx json-server [tiedostonimi]` ja sen jälkeen korvata ko. URL `app.js`-tiedostossa urlilla `http://localhost:3000/api` (jos ajaa mockia molemmista, ajaa niitä eri porteissa ja korvaa portin numeron).
+
 ## Muut huomiot
 
 Kiitos lehtulle APIen kaivamisesta!
