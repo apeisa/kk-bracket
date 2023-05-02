@@ -217,7 +217,7 @@ function clearHeaders() {
           <th>Nimi</th>
           <th>Mestari</th>
           <th>Pist.</th>
-          <th>Max. pist.</th>
+          <th>Max.</th>
         </tr>`;
 }
 
