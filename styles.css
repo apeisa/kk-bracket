@@ -79,3 +79,11 @@ footer {
   max-width: 100ch;
   margin: auto;
 }
+
+#loading {
+  text-align: center;
+}
+
+input[type="radio"] {
+  margin-right: 2em;
+}
