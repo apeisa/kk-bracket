@@ -83,6 +83,7 @@ function createHeaders(games, teams) {
     const div = document.createElement("div");
     div.classList.add("series");
     th.appendChild(div);
+    th.classList.add("series");
     tr.appendChild(th);
 
     const homeLogo = document.createElement("img");
@@ -212,11 +213,11 @@ function clearHeaders() {
   const thead = document.querySelector("thead");
   thead.innerHTML = `
   <tr>
-          <th>Sijoitus</th>
+          <th>Sij.</th>
           <th>Nimi</th>
-          <th>Mestarivalinta</th>
-          <th>Pisteitä</th>
-          <th>Mahdolliset maksimipisteet</th>
+          <th>Mestari</th>
+          <th>Pist.</th>
+          <th>Max. pist.</th>
         </tr>`;
 }
 

@@ -34,6 +34,14 @@ td.incorrect {
   background: rgb(106, 3, 3);
 }
 
+th {
+  padding-right: 5px;
+}
+
+th.series {
+  min-width: 80px;
+}
+
 td {
   width: 7%;
 }
