@@ -17,6 +17,9 @@ const LEAGUE_DISPLAY_NAME = "Koodiklinikan";
 const ENTRIES_URL = `https://low6-nhl-brackets-prod.azurewebsites.net/leagues/${LEAGUE_ID}/leaderboard?offset=0&limit=50`;
 const SERIES_URL = "https://low6-nhl-brackets-prod.azurewebsites.net/game";
 
+let ENTRIES_DATA = null;
+let SERIES_DATA = null;
+
 let title = document.querySelector("title");
 title.textContent = `${LEAGUE_DISPLAY_NAME} ${title.textContent}`;
 
@@ -164,8 +167,8 @@ function createRow(entry, tr, games, teams) {
 
     // If user's pick is not in the running anymore
     if (userPick != game.team_1_id && userPick != game.team_2_id) {
-      selectedPick.src = `invalid.svg`;
-      selectedPick.alt = "Invalid pick";
+      selectedPick.src = `dash.svg`;
+      selectedPick.alt = "Pick no longer in play";
     } else {
       selectedPick.src = `https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/${userPick}.svg`;
       selectedPick.alt = teams.find(
@@ -194,42 +197,126 @@ function createRow(entry, tr, games, teams) {
   });
 }
 
-fetch(ENTRIES_URL)
-  .then((res) => res.json())
-  .then(async ({ entries }) => {
-    const series = await fetch(SERIES_URL).then((res) => res.json());
+const fieldset = document.querySelector("fieldset");
 
-    const games = series.game.series_results;
-    const teams = series.game.teams;
+function clearTable() {
+  clearHeaders();
+  document.querySelector("tbody").innerHTML = "";
+}
 
-    const firstRoundGames = games.filter((game) => game.round_sequence === 1);
-    const secondRoundGames = games.filter((game) => game.round_sequence === 2);
-    const conferenceFinals = games.filter((game) => game.round_sequence === 3);
-    const finals = games.filter((game) => game.round_sequence === 4);
+function clearHeaders() {
+  const thead = document.querySelector("thead");
+  thead.innerHTML = `
+  <tr>
+          <th>Sijoitus</th>
+          <th>Nimi</th>
+          <th>Mestarivalinta</th>
+          <th>Pisteitä</th>
+          <th>Mahdolliset maksimipisteet</th>
+        </tr>`;
+}
 
-    // Choose the round to display based on the earliest round that is not finished
-    // If you want to tweak what is displayed, tinker with this.
-    let roundToDisplay = [];
-    if (!hasFinished(firstRoundGames)) {
-      roundToDisplay = firstRoundGames;
-    } else if (!hasFinished(secondRoundGames)) {
-      roundToDisplay = secondRoundGames;
-    } else if (!hasFinished(conferenceFinals)) {
-      roundToDisplay = conferenceFinals;
-    } else {
-      roundToDisplay = finals;
-    }
+async function renderFields() {
+  let [_, series] = await fetchData();
+  let games = series.game.series_results;
+  const firstRoundGames = games.filter((game) => game.round_sequence === 1);
+  const secondRoundGames = games.filter((game) => game.round_sequence === 2);
+  const conferenceFinals = games.filter((game) => game.round_sequence === 3);
 
-    createHeaders(roundToDisplay, teams);
+  fieldset.innerHTML = "<legend>Valitse kierros</legend>";
+  if (!hasFinished(firstRoundGames)) {
+    const r1 = createRoundSelector("Ensimmäinen kierros", "first", fieldset);
+    r1.checked = true;
+  } else if (!hasFinished(secondRoundGames)) {
+    const r1 = createRoundSelector("Ensimmäinen kierros", "first", fieldset);
+    const r2 = createRoundSelector("Toinen kierros", "second", fieldset);
+    r2.checked = true;
+  } else if (!hasFinished(conferenceFinals)) {
+    const r1 = createRoundSelector("Ensimmäinen kierros", "first", fieldset);
+    const r2 = createRoundSelector("Toinen kierros", "second", fieldset);
+    const r3 = createRoundSelector("Konferenssifinaalit", "third", fieldset);
+    r3.checked = true;
+  } else {
+    const r1 = createRoundSelector("Ensimmäinen kierros", "first", fieldset);
+    const r2 = createRoundSelector("Toinen kierros", "second", fieldset);
+    const r3 = createRoundSelector("Konferenssifinaalit", "third", fieldset);
+    const r4 = createRoundSelector("Stanley Cup", "fourth", fieldset);
+    r4.checked = true;
+  }
+}
 
-    const tbody = document.querySelector("tbody");
+function handleRoundChange(ev) {
+  const round = ev.target.value;
+  renderTable(round);
+}
 
-    entries.forEach((entry) => {
-      let tr = document.createElement("tr");
-      createRow(entry, tr, roundToDisplay, teams);
-      tbody.appendChild(tr);
-    });
+function createRoundSelector(label, name, fieldset) {
+  const radio = document.createElement("input");
+  radio.type = "radio";
+  radio.value = name;
+  radio.name = "round";
+  radio.id = name;
+  const labelNode = document.createElement("label");
+  labelNode.textContent = label;
+  labelNode.htmlFor = name;
 
-    document.querySelector("table").style = "display: block";
-    document.querySelector("#loading").style = "display: none";
+  radio.onchange = handleRoundChange;
+
+  fieldset.appendChild(labelNode);
+  fieldset.appendChild(radio);
+  return radio;
+}
+
+async function fetchData() {
+  if (ENTRIES_DATA === null) {
+    ENTRIES_DATA = (await fetch(ENTRIES_URL).then((res) => res.json())).entries;
+  }
+
+  if (SERIES_DATA === null) {
+    SERIES_DATA = await fetch(SERIES_URL).then((res) => res.json());
+  }
+
+  return [ENTRIES_DATA, SERIES_DATA];
+}
+
+async function renderTable(toDisplay) {
+  clearTable();
+  const [entries, series] = await fetchData();
+
+  const games = series.game.series_results;
+  const teams = series.game.teams;
+
+  const firstRoundGames = games.filter((game) => game.round_sequence === 1);
+  const secondRoundGames = games.filter((game) => game.round_sequence === 2);
+  const conferenceFinals = games.filter((game) => game.round_sequence === 3);
+  const finals = games.filter((game) => game.round_sequence === 4);
+
+  // Choose the round to display based on the earliest round that is not finished
+  // If you want to tweak what is displayed, tinker with this.
+  let roundToDisplay = [];
+  if (!hasFinished(firstRoundGames) || toDisplay === "first") {
+    roundToDisplay = firstRoundGames;
+  } else if (!hasFinished(secondRoundGames) || toDisplay === "second") {
+    roundToDisplay = secondRoundGames;
+  } else if (!hasFinished(conferenceFinals) || toDisplay === "third") {
+    roundToDisplay = conferenceFinals;
+  } else {
+    roundToDisplay = finals;
+  }
+
+  createHeaders(roundToDisplay, teams);
+
+  const tbody = document.querySelector("tbody");
+
+  entries.forEach((entry) => {
+    let tr = document.createElement("tr");
+    createRow(entry, tr, roundToDisplay, teams);
+    tbody.appendChild(tr);
   });
+
+  document.querySelector("table").style = "display: block";
+  document.querySelector("#loading").style = "display: none";
+  fieldset.style = "display: block";
+}
+
+renderFields().then(() => renderTable());

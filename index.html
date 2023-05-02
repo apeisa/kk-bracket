@@ -10,6 +10,12 @@
   <body>
     <h1>NHL Bracket Leaderboard 2023</h1>
 
+    <nav>
+      <fieldset style="display: none">
+        <legend>Valitse kierros</legend>
+      </fieldset>
+    </nav>
+
     <div id="loading">Haetaan dataa...</div>
     <table style="display: none">
       <thead>
@@ -24,6 +30,11 @@
       <tbody></tbody>
     </table>
     <footer>
+      <p>
+        <img src="dash.svg" alt="Pick no longer in play" width="20px" /> means
+        that player's pick for this round is no longer in game and thus cannot
+        score points from this round.
+      </p>
       <p>
         Koodi on MIT-lisensöity ja löytyy GitHubista:
         <a href="https://github.com/hamatti/kk-bracket">hamatti/kk-bracket</a>.
