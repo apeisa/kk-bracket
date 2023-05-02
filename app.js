@@ -10,8 +10,8 @@
 // If you want to configure this to your league, change the LEAGUE_ID to match
 // your league id in NHL Bracket Challenge
 // and LEAGUE_DISPLAY_NAME to your league's name for the heading
-const LEAGUE_ID = 19816;
-const LEAGUE_DISPLAY_NAME = "Koodiklinikan";
+const LEAGUE_ID = 19868;
+const LEAGUE_DISPLAY_NAME = "Apocalypsen";
 /* END OF CONFIGURATION */
 
 const ENTRIES_URL = `https://low6-nhl-brackets-prod.azurewebsites.net/leagues/${LEAGUE_ID}/leaderboard?offset=0&limit=50`;
